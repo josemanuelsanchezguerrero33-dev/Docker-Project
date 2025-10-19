@@ -1,7 +1,7 @@
-# 🧱 Taller: Dockerfile + Docker Compose (CRUD + MySQL)
+# Dockerfile + Docker Compose (CRUD + MySQL)
 
 ## Objetivo
-Crear una app web CRUD (tareas) y levantarla junto con MySQL usando **Dockerfile** y **Docker Compose**.
+Crear una app web CRUD  y levantarla junto con MySQL usando **Dockerfile** y **Docker Compose**.
 
 ## Estructura
 ```
