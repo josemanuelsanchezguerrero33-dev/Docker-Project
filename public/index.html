@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRUD Tareas</title>
+    <style>
+      :root{
+        --bg:#f5f7fb;
+        --card:#ffffff;
+        --muted:#6b7280;
+        --primary:#2563eb;
+        --danger:#ef4444;
+        --success:#10b981;
+        --radius:10px;
+        --shadow: 0 6px 18px rgba(15,23,42,0.06);
+        --max-width:760px;
+      }
+      *{box-sizing:border-box}
+      body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); margin:0; padding:32px; color:#111827}
+      .wrap{max-width:var(--max-width); margin:0 auto}
+      header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+      h1{font-size:1.4rem;margin:0}
+      .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px}
+      .controls{display:flex;gap:12px;align-items:center}
+      .input{flex:1;display:flex;gap:8px}
+      input[type=text]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;font-size:0.95rem}
+      button{background:var(--primary);border:none;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+      button.secondary{background:#fff;color:var(--muted);border:1px solid #e6e9ef}
+      .meta{color:var(--muted);font-size:0.9rem}
+      .list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+      .task{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid #f0f2f5;background:linear-gradient(180deg, #fff, #fbfdff)}
+      .task .title{flex:1}
+      .title.done{text-decoration:line-through;color:var(--muted)}
+      .task small{display:block;color:var(--muted)}
+      .actions{display:flex;gap:8px}
+      .btn-danger{background:var(--danger)}
+      .btn-ghost{background:transparent;border:1px solid transparent;color:var(--muted)}
+      .empty{padding:28px;text-align:center;color:var(--muted)}
+      .notice{margin-top:10px;padding:8px 12px;border-radius:8px;font-size:0.95rem}
+      .notice.error{background:#fff4f4;border:1px solid #ffe2e2;color:var(--danger)}
+      .notice.ok{background:#f0fdf4;border:1px solid #dcfce7;color:var(--success)}
+      .loading{width:18px;height:18px;border-radius:50%;border:3px solid #e6e9ef;border-top-color:var(--primary);animation:spin 1s linear infinite}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      @media (max-width:520px){.controls{flex-direction:column;align-items:stretch}.input{width:100%}button{width:100%}}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>CRUD de Tareas</h1>
+        <div class="meta">API: <strong>/api/tasks</strong></div>
+      </header>
+
+      <div class="card">
+        <div class="controls">
+          <div class="input">
+            <input id="newTitle" type="text" placeholder="Escribe una nueva tarea..." aria-label="Título de la tarea" />
+            <button id="addBtn">Agregar</button>
+          </div>
+          <div id="status" class="meta">&nbsp;</div>
+        </div>
+
+        <div id="msg"></div>
+
+        <div class="list" id="list">
+          <div class="empty">Cargando tareas...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = '/api/tasks';
+      const listEl = document.getElementById('list');
+      const input = document.getElementById('newTitle');
+      const addBtn = document.getElementById('addBtn');
+      const status = document.getElementById('status');
+      const msg = document.getElementById('msg');
+
+      function showMsg(text, type='error'){
+        msg.innerHTML = `<div class="notice ${type==='ok'?'ok':'error'}">${text}</div>`;
+        setTimeout(()=>{ if(msg.firstChild) msg.removeChild(msg.firstChild) },3000);
+      }
+
+      function setLoading(on){
+        status.innerHTML = on ? '<span class="loading" aria-hidden="true"></span> Cargando' : '';
+      }
+
+      function el(tag, props={}, ...children){
+        const e = document.createElement(tag);
+        Object.assign(e, props);
+        for(const c of children){ if(typeof c === 'string') e.appendChild(document.createTextNode(c)); else if(c) e.appendChild(c); }
+        return e;
+      }
+
+      function renderItem(t){
+        const chk = el('input',{type:'checkbox', checked: !!t.done});
+        chk.addEventListener('change', ()=> updateTask(t.id, {done: chk.checked}));
+
+        const title = el('div',{className: 'title' + (t.done? ' done':''), innerText: t.title});
+        const meta = el('small',{}, new Date(t.created_at).toLocaleString());
+        title.appendChild(meta);
+
+        const del = el('button',{className:'btn-danger', innerText:'Eliminar'});
+        del.style.backgroundColor = 'var(--danger)';
+        del.addEventListener('click', ()=> removeTask(t.id));
+
+        const actions = el('div',{className:'actions'});
+        const edit = el('button',{className:'secondary btn-ghost', innerText:'Editar'});
+        edit.addEventListener('click', ()=>{
+          const v = prompt('Editar título', t.title);
+          if(v !== null) updateTask(t.id, { title: v });
+        });
+        actions.appendChild(edit);
+        actions.appendChild(del);
+
+        const item = el('div',{className:'task'});
+        item.appendChild(chk);
+        item.appendChild(title);
+        item.appendChild(actions);
+        return item;
+      }
+
+      async function load(){
+        try{
+          setLoading(true);
+          const res = await fetch(API);
+          if(!res.ok) throw new Error('Error al recuperar tareas');
+          const data = await res.json();
+          listEl.innerHTML = '';
+          if(!data.length){ listEl.appendChild(el('div',{className:'empty'}, 'No hay tareas. Agrega la primera.')); }
+          data.forEach(t => listEl.appendChild(renderItem(t)));
+        }catch(e){ listEl.innerHTML = ''; listEl.appendChild(el('div',{className:'empty'}, 'No fue posible cargar las tareas.')); showMsg(e.message); }
+        finally{ setLoading(false); }
+      }
+
+      addBtn.addEventListener('click', async ()=>{
+        const title = input.value.trim();
+        if(!title) return showMsg('Escribe el título de la tarea');
+        addBtn.disabled = true; addBtn.innerText = 'Agregando...';
+        try{
+          const res = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ title }) });
+          if(!res.ok) throw new Error('Error al crear la tarea');
+          input.value = '';
+          showMsg('Tarea creada', 'ok');
+          await load();
+        }catch(e){ showMsg(e.message); }
+        finally{ addBtn.disabled = false; addBtn.innerText = 'Agregar'; }
+      });
+
+      async function updateTask(id, body){
+        try{
+          const res = await fetch(`${API}/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+          if(!res.ok) throw new Error('No se pudo actualizar');
+          await load();
+        }catch(e){ showMsg(e.message); }
+      }
+
+      async function removeTask(id){
+        if(!confirm('¿Eliminar tarea?')) return;
+        try{
+          const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+          if(res.status === 204) { showMsg('Tarea eliminada', 'ok'); await load(); }
+          else throw new Error('No se pudo eliminar');
+        }catch(e){ showMsg(e.message); }
+      }
+
+      // initial load
+      load();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+.env
+
+# Logs
+logs
+*.log
+
+# Docker
+db_data/
+docker-compose.override.yml
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+.idea/
+
+# Others
+*.zip
