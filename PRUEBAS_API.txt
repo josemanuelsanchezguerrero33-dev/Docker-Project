@@ -1,0 +1,200 @@
+# ====================================
+# PRUEBAS DE API - CRUD PRODUCTOS
+# ====================================
+
+# Estas son pruebas usando curl para probar la API REST
+# Ejecutar en Git Bash, PowerShell (con curl instalado), o CMD
+
+# ====================================
+# 1. HEALTH CHECK
+# ====================================
+
+# Verificar que el servidor esté funcionando
+curl http://localhost:3000/health
+
+# Respuesta esperada:
+# {"status":"OK","message":"Servidor funcionando correctamente"}
+
+
+# ====================================
+# 2. GET - LISTAR TODOS LOS PRODUCTOS
+# ====================================
+
+curl http://localhost:3000/api/productos
+
+# Respuesta esperada (si no hay productos):
+# []
+
+# Respuesta esperada (con productos):
+# [{"id":1,"nombre":"Laptop HP","descripcion":"...","precio":"899.99","stock":15}]
+
+
+# ====================================
+# 3. POST - CREAR UN PRODUCTO
+# ====================================
+
+# Crear producto 1
+curl -X POST http://localhost:3000/api/productos ^
+  -H "Content-Type: application/json" ^
+  -d "{\"nombre\":\"Laptop HP Pavilion\",\"descripcion\":\"Laptop 15.6 pulgadas, Intel i5, 8GB RAM\",\"precio\":899.99,\"stock\":15}"
+
+# Crear producto 2
+curl -X POST http://localhost:3000/api/productos ^
+  -H "Content-Type: application/json" ^
+  -d "{\"nombre\":\"Mouse Logitech\",\"descripcion\":\"Mouse inalambrico ergonomico\",\"precio\":29.99,\"stock\":50}"
+
+# Crear producto 3
+curl -X POST http://localhost:3000/api/productos ^
+  -H "Content-Type: application/json" ^
+  -d "{\"nombre\":\"Teclado Mecanico\",\"descripcion\":\"Teclado RGB, switches Cherry MX Red\",\"precio\":149.99,\"stock\":25}"
+
+# Crear producto 4
+curl -X POST http://localhost:3000/api/productos ^
+  -H "Content-Type: application/json" ^
+  -d "{\"nombre\":\"Monitor Samsung 24\",\"descripcion\":\"Monitor Full HD, 75Hz, panel IPS\",\"precio\":189.99,\"stock\":30}"
+
+# Respuesta esperada:
+# {"id":1,"nombre":"Laptop HP Pavilion","descripcion":"...","precio":"899.99","stock":15,"fecha_creacion":"2024-..."}
+
+
+# ====================================
+# 4. GET - OBTENER UN PRODUCTO POR ID
+# ====================================
+
+# Obtener producto con ID 1
+curl http://localhost:3000/api/productos/1
+
+# Respuesta esperada:
+# {"id":1,"nombre":"Laptop HP Pavilion","descripcion":"...","precio":"899.99","stock":15}
+
+
+# ====================================
+# 5. PUT - ACTUALIZAR UN PRODUCTO
+# ====================================
+
+# Actualizar producto con ID 1 (cambiar precio y stock)
+curl -X PUT http://localhost:3000/api/productos/1 ^
+  -H "Content-Type: application/json" ^
+  -d "{\"nombre\":\"Laptop HP Pavilion\",\"descripcion\":\"Laptop 15.6 pulgadas, Intel i5, 8GB RAM\",\"precio\":799.99,\"stock\":20}"
+
+# Respuesta esperada:
+# {"id":1,"nombre":"Laptop HP Pavilion","descripcion":"...","precio":"799.99","stock":20}
+
+
+# ====================================
+# 6. DELETE - ELIMINAR UN PRODUCTO
+# ====================================
+
+# Eliminar producto con ID 2
+curl -X DELETE http://localhost:3000/api/productos/2
+
+# Respuesta esperada:
+# {"message":"Producto eliminado correctamente","producto":{"id":2,"nombre":"Mouse Logitech",...}}
+
+
+# ====================================
+# PRUEBAS DE VALIDACIÓN
+# ====================================
+
+# Intentar crear producto sin campos requeridos (debe fallar)
+curl -X POST http://localhost:3000/api/productos ^
+  -H "Content-Type: application/json" ^
+  -d "{\"descripcion\":\"Producto sin nombre\"}"
+
+# Respuesta esperada:
+# {"error":"Faltan campos requeridos"}
+
+
+# Intentar obtener producto que no existe (debe fallar)
+curl http://localhost:3000/api/productos/999
+
+# Respuesta esperada:
+# {"error":"Producto no encontrado"}
+
+
+# ====================================
+# SCRIPT COMPLETO DE PRUEBA
+# ====================================
+
+echo "=== INICIANDO PRUEBAS DE API ==="
+echo.
+
+echo "1. Health Check..."
+curl http://localhost:3000/health
+echo.
+echo.
+
+echo "2. Listar productos (debe estar vacio)..."
+curl http://localhost:3000/api/productos
+echo.
+echo.
+
+echo "3. Crear producto 1..."
+curl -X POST http://localhost:3000/api/productos -H "Content-Type: application/json" -d "{\"nombre\":\"Laptop HP\",\"descripcion\":\"Laptop Intel i5\",\"precio\":899.99,\"stock\":15}"
+echo.
+echo.
+
+echo "4. Crear producto 2..."
+curl -X POST http://localhost:3000/api/productos -H "Content-Type: application/json" -d "{\"nombre\":\"Mouse Logitech\",\"descripcion\":\"Mouse inalambrico\",\"precio\":29.99,\"stock\":50}"
+echo.
+echo.
+
+echo "5. Listar todos los productos..."
+curl http://localhost:3000/api/productos
+echo.
+echo.
+
+echo "6. Obtener producto 1..."
+curl http://localhost:3000/api/productos/1
+echo.
+echo.
+
+echo "7. Actualizar producto 1..."
+curl -X PUT http://localhost:3000/api/productos/1 -H "Content-Type: application/json" -d "{\"nombre\":\"Laptop HP Actualizada\",\"descripcion\":\"Nueva descripcion\",\"precio\":799.99,\"stock\":20}"
+echo.
+echo.
+
+echo "8. Eliminar producto 2..."
+curl -X DELETE http://localhost:3000/api/productos/2
+echo.
+echo.
+
+echo "9. Listar productos finales..."
+curl http://localhost:3000/api/productos
+echo.
+echo.
+
+echo "=== PRUEBAS COMPLETADAS ==="
+
+
+# ====================================
+# NOTAS PARA POWERSHELL
+# ====================================
+
+# Si usas PowerShell, usa estas versiones:
+
+# GET
+# Invoke-WebRequest -Uri http://localhost:3000/api/productos -Method GET
+
+# POST
+# $body = @{nombre="Laptop HP";descripcion="Laptop Intel i5";precio=899.99;stock=15} | ConvertTo-Json
+# Invoke-WebRequest -Uri http://localhost:3000/api/productos -Method POST -Body $body -ContentType "application/json"
+
+# PUT
+# $body = @{nombre="Laptop HP";descripcion="Nueva desc";precio=799.99;stock=20} | ConvertTo-Json
+# Invoke-WebRequest -Uri http://localhost:3000/api/productos/1 -Method PUT -Body $body -ContentType "application/json"
+
+# DELETE
+# Invoke-WebRequest -Uri http://localhost:3000/api/productos/2 -Method DELETE
+
+
+# ====================================
+# USAR POSTMAN O INSOMNIA
+# ====================================
+
+# También puedes usar herramientas gráficas:
+# - Postman: https://www.postman.com/
+# - Insomnia: https://insomnia.rest/
+# - Thunder Client (extensión de VS Code)
+
+# Importa estos endpoints en tu herramienta favorita

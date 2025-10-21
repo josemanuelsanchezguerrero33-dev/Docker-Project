@@ -1,0 +1,49 @@
+services:
+  # Base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: crud_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cruddb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - crud_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u appuser -papppass123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Aplicación Node.js
+  app:
+    build: .
+    container_name: crud_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: appuser
+      DB_PASSWORD: apppass123
+      DB_NAME: cruddb
+    depends_on:
+      - db
+    networks:
+      - crud_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  crud_network:
+    driver: bridge

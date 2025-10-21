@@ -1,0 +1,124 @@
+═══════════════════════════════════════════════════════════════
+    🐳 DOCKER CRUD APP - INICIO RÁPIDO (5 MINUTOS) 🚀
+═══════════════════════════════════════════════════════════════
+
+¡Bienvenido! Esta guía te llevará paso a paso para tener tu
+aplicación funcionando en menos de 5 minutos.
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  PASO 1: VERIFICAR REQUISITOS (1 minuto)                 ║
+╚═══════════════════════════════════════════════════════════╝
+
+□ Abre Docker Desktop
+□ Espera a que el ícono esté VERDE
+□ Abre una terminal (CMD o PowerShell)
+□ Ejecuta: docker --version
+  ✓ Debe mostrar la versión de Docker
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  PASO 2: INICIAR LA APLICACIÓN (2 minutos)               ║
+╚═══════════════════════════════════════════════════════════╝
+
+OPCIÓN A - Usando el script (MÁS FÁCIL):
+────────────────────────────────────────
+1. Doble clic en: start.bat
+2. Presiona 'S' cuando pregunte si abrir navegador
+3. ¡Listo! La app se abrirá automáticamente
+
+OPCIÓN B - Usando comandos:
+────────────────────────────
+1. Abre CMD o PowerShell
+2. cd C:\Users\pinnc\docker-crud-app
+3. docker-compose up -d
+4. Abre navegador: http://localhost:3000
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  PASO 3: PROBAR LA APLICACIÓN (2 minutos)                ║
+╚═══════════════════════════════════════════════════════════╝
+
+1. En el navegador verás la interfaz del CRUD
+
+2. Crea tu primer producto:
+   Nombre: Laptop HP
+   Descripción: Laptop 15 pulgadas
+   Precio: 899.99
+   Stock: 10
+   
+3. Click en "Agregar Producto"
+
+4. ¡El producto aparecerá en la lista!
+
+5. Prueba editar y eliminar productos
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  ¿ALGO SALIÓ MAL? - SOLUCIONES RÁPIDAS                   ║
+╚═══════════════════════════════════════════════════════════╝
+
+❌ No se abre la aplicación
+✅ Espera 10 segundos más (la BD tarda en iniciar)
+✅ Ejecuta: docker-compose logs -f
+
+❌ Puerto 3000 en uso
+✅ Cambia el puerto en docker-compose.yml
+   ports: - "8080:3000"
+✅ Luego usa: http://localhost:8080
+
+❌ Docker no está corriendo
+✅ Abre Docker Desktop
+✅ Espera a que el ícono esté verde
+
+❌ Error al construir
+✅ Ejecuta: docker-compose down
+✅ Luego: docker-compose up -d --build
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  COMANDOS ÚTILES                                          ║
+╚═══════════════════════════════════════════════════════════╝
+
+Ver logs:
+  docker-compose logs -f
+
+Ver estado:
+  docker-compose ps
+
+Reiniciar:
+  docker-compose restart
+
+Detener:
+  docker-compose down
+
+Detener y limpiar datos:
+  docker-compose down -v
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  SIGUIENTE: SUBIR A DOCKERHUB                             ║
+╚═══════════════════════════════════════════════════════════╝
+
+1. Doble clic en: build-and-push.bat
+2. Ingresa tu usuario de DockerHub
+3. Ingresa tu contraseña
+4. ¡Espera a que termine!
+5. Verifica en: https://hub.docker.com
+
+
+╔═══════════════════════════════════════════════════════════╗
+║  MÁS INFORMACIÓN                                          ║
+╚═══════════════════════════════════════════════════════════╝
+
+📖 Guía completa: TALLER.md
+📝 Comandos detallados: COMANDOS.txt
+🔧 Mejores prácticas: MEJORES_PRACTICAS.txt
+📊 Resumen del proyecto: RESUMEN.txt
+🧪 Pruebas de API: PRUEBAS_API.txt
+
+
+═══════════════════════════════════════════════════════════════
+    ¡LISTO! Tu aplicación está funcionando 🎉
+    Abre: http://localhost:3000
+═══════════════════════════════════════════════════════════════

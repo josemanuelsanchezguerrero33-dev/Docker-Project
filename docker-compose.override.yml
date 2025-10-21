@@ -1,0 +1,12 @@
+services:
+  app:
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./:/app:delegated
+      - ./public:/app/public:delegated
+      # keep container node_modules so host bind-mount doesn't hide them
+      - /app/node_modules
+    ports:
+      - "3000:3000"

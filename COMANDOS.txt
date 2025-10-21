@@ -1,0 +1,293 @@
+# ====================================
+# GUÍA PASO A PASO - DOCKER CRUD APP
+# ====================================
+
+# ============================================
+# PASO 1: VERIFICAR INSTALACIÓN DE DOCKER
+# ============================================
+
+# Verificar versión de Docker
+docker --version
+
+# Verificar versión de Docker Compose
+docker-compose --version
+
+# Verificar que Docker esté corriendo
+docker ps
+
+
+# ============================================
+# PASO 2: CONSTRUIR Y LEVANTAR LA APLICACIÓN
+# ============================================
+
+# Navegar al directorio del proyecto
+cd C:\Users\pinnc\docker-crud-app
+
+# Construir y levantar todos los servicios
+docker-compose up -d
+
+# Ver el estado de los contenedores
+docker-compose ps
+
+# Ver los logs en tiempo real
+docker-compose logs -f
+
+# Para detener los logs presiona Ctrl+C
+
+
+# ============================================
+# PASO 3: VERIFICAR QUE TODO FUNCIONE
+# ============================================
+
+# Verificar que los contenedores estén corriendo
+docker ps
+
+# Deberías ver dos contenedores:
+# - crud_app (puerto 3000)
+# - crud_postgres (puerto 5432)
+
+# Probar el health check
+curl http://localhost:3000/health
+
+# O abrir en el navegador:
+# http://localhost:3000
+
+
+# ============================================
+# PASO 4: SUBIR LA IMAGEN A DOCKERHUB
+# ============================================
+
+# 4.1 Login en DockerHub
+docker login
+# Ingresa tu usuario y password de DockerHub
+
+# 4.2 Construir la imagen con tu usuario
+# REEMPLAZA "tuusuario" con tu nombre de usuario de DockerHub
+docker build -t tuusuario/crud-app:latest .
+docker build -t tuusuario/crud-app:1.0.0 .
+
+# Ejemplo:
+# docker build -t johndoe/crud-app:latest .
+
+# 4.3 Verificar que la imagen se creó
+docker images | grep crud-app
+
+# 4.4 Subir la imagen a DockerHub
+docker push tuusuario/crud-app:latest
+docker push tuusuario/crud-app:1.0.0
+
+# Ejemplo:
+# docker push johndoe/crud-app:latest
+
+# 4.5 Verificar en DockerHub
+# Ir a: https://hub.docker.com/
+# Deberías ver tu imagen en tu repositorio
+
+
+# ============================================
+# PASO 5: PROBAR LA IMAGEN DESDE DOCKERHUB
+# ============================================
+
+# 5.1 Detener y eliminar contenedores locales
+docker-compose down
+
+# 5.2 Descargar la imagen desde DockerHub
+docker pull tuusuario/crud-app:latest
+
+# 5.3 Ejecutar solo la base de datos
+docker run -d \
+  --name crud_postgres \
+  -e POSTGRES_PASSWORD=postgres123 \
+  -e POSTGRES_DB=cruddb \
+  -p 5432:5432 \
+  postgres:15-alpine
+
+# 5.4 Esperar 5 segundos para que la BD esté lista
+# Luego ejecutar la aplicación desde DockerHub
+docker run -d \
+  --name crud_app \
+  -p 3000:3000 \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PASSWORD=postgres123 \
+  tuusuario/crud-app:latest
+
+# 5.5 Verificar que todo funcione
+docker ps
+# Abrir: http://localhost:3000
+
+
+# ============================================
+# COMANDOS ÚTILES DE MANTENIMIENTO
+# ============================================
+
+# Ver logs de un contenedor específico
+docker logs crud_app -f
+docker logs crud_postgres -f
+
+# Entrar a un contenedor
+docker exec -it crud_app sh
+docker exec -it crud_postgres psql -U postgres -d cruddb
+
+# Reiniciar un servicio
+docker-compose restart app
+docker-compose restart db
+
+# Detener todos los servicios
+docker-compose stop
+
+# Detener y eliminar contenedores
+docker-compose down
+
+# Detener, eliminar contenedores Y volúmenes (CUIDADO: elimina datos)
+docker-compose down -v
+
+# Ver uso de recursos
+docker stats
+
+# Listar todas las imágenes
+docker images
+
+# Eliminar una imagen
+docker rmi tuusuario/crud-app:latest
+
+# Limpiar todo (contenedores parados, imágenes sin usar, etc)
+docker system prune -a
+
+
+# ============================================
+# VERIFICAR QUE LA APP FUNCIONE CORRECTAMENTE
+# ============================================
+
+# 1. Abrir en el navegador: http://localhost:3000
+# 2. Agregar un producto de prueba:
+#    - Nombre: Laptop HP
+#    - Descripción: Laptop de 15 pulgadas
+#    - Precio: 899.99
+#    - Stock: 10
+# 3. Click en "Agregar Producto"
+# 4. El producto debe aparecer en la lista
+# 5. Probar editar el producto
+# 6. Probar eliminar el producto
+
+
+# ============================================
+# TROUBLESHOOTING (SOLUCIÓN DE PROBLEMAS)
+# ============================================
+
+# Problema: Puerto 3000 ya está en uso
+# Solución: Cambiar el puerto en docker-compose.yml
+#   ports:
+#     - "8080:3000"  # Usar puerto 8080
+
+# Problema: La app no se conecta a la BD
+# Solución: Verificar que la BD esté corriendo
+docker logs crud_postgres
+# Esperar unos segundos más para que la BD esté lista
+
+# Problema: Error al construir la imagen
+# Solución: Verificar que estés en el directorio correcto
+cd C:\Users\pinnc\docker-crud-app
+docker-compose build --no-cache
+
+# Problema: No puedo hacer push a DockerHub
+# Solución: Verificar que estés logueado
+docker login
+# Verificar que el nombre de usuario sea correcto en el tag
+
+
+# ============================================
+# ESTRUCTURA FINAL DEL PROYECTO
+# ============================================
+
+# docker-crud-app/
+# ├── public/
+# │   └── index.html          # Interfaz web
+# ├── server.js               # Servidor Express
+# ├── package.json            # Dependencias
+# ├── Dockerfile              # Construcción de imagen
+# ├── docker-compose.yml      # Orquestación
+# ├── .dockerignore          # Archivos a ignorar
+# ├── README.md              # Documentación
+# └── COMANDOS.txt           # Esta guía
+
+
+# ============================================
+# COMANDOS PARA PRESENTACIÓN/DEMO
+# ============================================
+
+# 1. Mostrar que Docker está instalado
+docker --version
+docker-compose --version
+
+# 2. Mostrar el código del Dockerfile
+type Dockerfile
+
+# 3. Mostrar el docker-compose.yml
+type docker-compose.yml
+
+# 4. Levantar la aplicación
+docker-compose up -d
+
+# 5. Mostrar contenedores corriendo
+docker ps
+
+# 6. Mostrar logs
+docker-compose logs
+
+# 7. Abrir navegador en http://localhost:3000
+
+# 8. Crear algunos productos de ejemplo
+
+# 9. Mostrar la imagen construida
+docker images
+
+# 10. Hacer push a DockerHub (si ya hiciste login)
+docker push tuusuario/crud-app:latest
+
+# 11. Limpiar al final
+docker-compose down
+
+
+# ============================================
+# NOTAS IMPORTANTES
+# ============================================
+
+# - Reemplazar "tuusuario" con tu usuario de DockerHub
+# - La primera vez puede tardar en descargar las imágenes base
+# - Los datos de la BD se guardan en un volumen Docker
+# - Para eliminar los datos: docker-compose down -v
+# - El puerto 3000 debe estar libre
+# - El puerto 5432 debe estar libre (o cambiar en docker-compose.yml)
+
+
+# ============================================
+# INFORMACIÓN ADICIONAL
+# ============================================
+
+# Tecnologías usadas:
+# - Node.js 18 (Alpine)
+# - Express.js 4
+# - PostgreSQL 15 (Alpine)
+# - HTML5 + CSS3 + JavaScript Vanilla
+
+# Endpoints de la API:
+# - GET    /api/productos         (Listar todos)
+# - GET    /api/productos/:id     (Obtener uno)
+# - POST   /api/productos         (Crear)
+# - PUT    /api/productos/:id     (Actualizar)
+# - DELETE /api/productos/:id     (Eliminar)
+# - GET    /health                (Health check)
+
+# Variables de entorno disponibles:
+# - PORT (default: 3000)
+# - DB_HOST (default: db)
+# - DB_PORT (default: 5432)
+# - DB_USER (default: postgres)
+# - DB_PASSWORD (default: postgres123)
+# - DB_NAME (default: cruddb)
+
+
+# ============================================
+# FIN DE LA GUÍA
+# ============================================
+# ¡Éxito con tu proyecto Docker! 🐳🚀
